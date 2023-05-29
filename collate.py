@@ -4,6 +4,7 @@ import numpy as np
 import librosa
 import sklearn
 from sklearn import preprocessing
+from custom_dataset import CustomDataset
 
 def process_data(np_wav, nperseg=1024, samplerate=24000):
     # Function to process a single piece of data
@@ -14,16 +15,18 @@ def process_data(np_wav, nperseg=1024, samplerate=24000):
     std = np.std(pd, axis=1, keepdims=True)
     pd = (pd - mean) / std
     new_shape = int(939 * 1024/nperseg)
-    return torch.tensor(np.pad(pd, ((0, 0), (0, new_shape - pd.shape[1])), mode='constant'))
+    pad = np.pad(pd, ((0, 0), (0, new_shape - pd.shape[1])), mode='constant')
+    return torch.tensor(np.expand_dims(np.swapaxes(pad,0,1), axis=0))
 
-def process_data_mfcc(np_wav, nperseg=512, samplerate=24000):
+def process_data_mfcc(np_wav, nperseg=1024, samplerate=24000):
     mfcc = librosa.feature.mfcc(y=np_wav.astype(float), sr=samplerate, hop_length=nperseg)
     pd = sklearn.preprocessing.scale(mfcc, axis=1)
     mean = np.mean(pd, axis=1, keepdims=True)
     std = np.std(pd, axis=1, keepdims=True)
     pd = (pd - mean) / std
     new_shape = int(469 * 1024/nperseg)
-    return torch.tensor(np.pad(pd, ((0, 0), (0, new_shape - pd.shape[1])), mode='constant'))
+    pad = np.pad(pd, ((0, 0), (0, new_shape - pd.shape[1])), mode='constant')
+    return torch.tensor(np.expand_dims(np.swapaxes(pad,0,1), axis=0))
     
 
 def collate_fn(batch):
@@ -33,4 +36,4 @@ def collate_fn(batch):
     for data in features_batch:
         processed_data = process_data_mfcc(data)
         processed_batch.append(processed_data)
-    return torch.stack(processed_batch)#, torch.tensor(labels_batch)
+    return torch.stack(processed_batch), torch.tensor(labels_batch)
