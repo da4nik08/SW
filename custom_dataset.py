@@ -9,6 +9,4 @@ class CustomDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        data = self.data[idx]
-        labels = self.labels[idx]
-        return data, labels
+        return self.data[idx], self.labels[idx]
