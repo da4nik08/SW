@@ -26,7 +26,7 @@ def process_data_mfcc(np_wav, nperseg=1024, samplerate=24000):
     pd = (pd - mean) / std
     new_shape = int(469 * 1024/nperseg)
     pad = np.pad(pd, ((0, 0), (0, new_shape - pd.shape[1])), mode='constant')
-    return torch.tensor(np.expand_dims(np.swapaxes(pad,0,1), axis=0))
+    return torch.tensor(np.expand_dims(np.swapaxes(pad,0,1), axis=0), dtype=torch.float)
     
 
 def collate_fn(batch):
